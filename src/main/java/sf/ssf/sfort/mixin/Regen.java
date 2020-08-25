@@ -57,6 +57,9 @@ public class Regen {
 		} else if (this.foodLevel <= 0) {
 			++this.foodStarvationTimer;
 			if (this.foodStarvationTimer >= sf.ssf.sfort.Regen.starve_delay) {
+				if (sf.ssf.sfort.Regen.starve_kill){
+					player.damage(DamageSource.STARVE, Float.MAX_VALUE);
+				}else
 				if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
 					player.damage(DamageSource.STARVE, sf.ssf.sfort.Regen.starve_cost);
 				}
