@@ -25,7 +25,7 @@ public class Regen implements ModInitializer{
             List<String> la = Files.readAllLines(confFile.toPath());
             List<String> defaultDesc = Arrays.asList(
                     "^-Duration in ticks between regeneration [80]",
-                    "^-How much exhaustion should regeneration cause  [1.5]",
+                    "^-How much saturation should regeneration take  [1.5]",
                     "^-How much should regeneration heal  [1.0]",
                     "^-Ignore natural regeneration gamerule [false] true | false"
             );
