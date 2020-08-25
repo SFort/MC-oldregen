@@ -1,10 +1,13 @@
 package sf.ssf.sfort.mixin;
 
 
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,29 +23,51 @@ public class Regen {
 	private int foodStarvationTimer;
 	@Shadow
 	private float foodSaturationLevel;
+	@Shadow
+	private int prevFoodLevel;
 
-	/*
-	i have put way to much time and failed projects into trying to figure out redirects
-	and at this point i think I'm going to start pretending they don't exist
-
-	@Redirect(method = "Lnet/minecraft/entity/player/HungerManager;update(Lnet/minecraft/entity/player/PlayerEntity;)V",
-			at= @At(target = "Lnet/minecraft/entity/player/HungerManager;foodSaturationLevel:Ljava/lang/Float",
-					value = "FIELD",opcode = Opcodes.GETFIELD, ordinal = 3))
-	private float getSaturation(HungerManager i) {
-		return 0.0F;
-	}
-	*/
+	//Practically and @Overwrite
 	@Inject(method = "update", at = @At("HEAD"), cancellable = true)
-	public void update(PlayerEntity player, CallbackInfo info) {
-		if (sf.ssf.sfort.Regen.ignoreGamerules||(player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION))
-				&& this.foodSaturationLevel > 0.0F && player.canFoodHeal()) {
+	public void update(PlayerEntity player,CallbackInfo info) {
+		Difficulty difficulty = player.world.getDifficulty();
+		this.prevFoodLevel = this.foodLevel;
+		if (this.exhaustion > 4.0F) {
+			this.exhaustion -= 4.0F;
+			if (this.foodSaturationLevel > 0.0F) {
+				this.foodSaturationLevel = Math.max(this.foodSaturationLevel - 1.0F, 0.0F);
+			} else if (difficulty != Difficulty.PEACEFUL) {
+				this.foodLevel = Math.max(this.foodLevel - 1, 0);
+			}
+		}
+		boolean bl = player.world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+		if ((sf.ssf.sfort.Regen.ignoreGamerules || bl) && this.foodSaturationLevel > 0.0F && player.canFoodHeal() && this.foodLevel >= sf.ssf.sfort.Regen.sat_food_req) {
 			++this.foodStarvationTimer;
-			if (this.foodStarvationTimer >= sf.ssf.sfort.Regen.delay) {
-				player.heal(sf.ssf.sfort.Regen.heal);
-				this.foodSaturationLevel = Math.max(this.foodSaturationLevel - sf.ssf.sfort.Regen.cost, 0.0F);
+			if (this.foodStarvationTimer >= sf.ssf.sfort.Regen.sat_delay) {
+				player.heal(sf.ssf.sfort.Regen.sat_heal);
+				this.addExhaustion(sf.ssf.sfort.Regen.sat_cost);
 				this.foodStarvationTimer = 0;
 			}
-			info.cancel();
+		} else if (bl && this.foodLevel >= sf.ssf.sfort.Regen.food_req && player.canFoodHeal()) {
+			++this.foodStarvationTimer;
+			if (this.foodStarvationTimer >= sf.ssf.sfort.Regen.food_delay) {
+				player.heal(sf.ssf.sfort.Regen.food_heal);
+				this.addExhaustion(sf.ssf.sfort.Regen.food_cost);
+				this.foodStarvationTimer = 0;
+			}
+		} else if (this.foodLevel <= 0) {
+			++this.foodStarvationTimer;
+			if (this.foodStarvationTimer >= sf.ssf.sfort.Regen.starve_delay) {
+				if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
+					player.damage(DamageSource.STARVE, sf.ssf.sfort.Regen.starve_cost);
+				}
+				this.foodStarvationTimer = 0;
+			}
+		} else {
+			this.foodStarvationTimer = 0;
 		}
+		info.cancel();
+	}
+	public void addExhaustion(float exhaustion) {
+		this.exhaustion = Math.min(this.exhaustion + exhaustion, 40.0F);
 	}
 }
