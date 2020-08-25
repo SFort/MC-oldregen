@@ -51,7 +51,6 @@ public class Regen implements ModInitializer{
                     "^-Should starvation instantly kill [false] true | false"
             );
             String[] init =new String[Math.max(la.size(), defaultDesc.size() * 2)|1];
-            Arrays.fill(init,"");
             String[] ls = la.toArray(init);
             for (int i = 0; i<defaultDesc.size();++i)
                 ls[i*2+1]= defaultDesc.get(i);
