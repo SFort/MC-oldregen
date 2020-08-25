@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "oldregen",
+  "version": "${version}",
+
+  "name": "Good Ol' Regen",
+  "description": "Removes fast regen, like it was pre1.9",
+  "authors": [
+    "SFort"
+  ],
+  "contact": {
+    "sources": "https://github.com/SFort/MC-oldregen"
+  },
+
+  "license": "MIT",
+
+  "environment": "*",
+  "mixins": [
+    "oldregen.mixins.json"
+  ],
+  "entrypoints": {
+    "main": [
+      "sf.ssf.sfort.Regen"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "*"
+  }
+}
