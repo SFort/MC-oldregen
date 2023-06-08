@@ -20,7 +20,7 @@
   ],
   "entrypoints": {
     "main": [
-      "sf.ssf.sfort.Regen"
+      "tf.ssf.sfort.oldregen.OlRegenConfig"
     ]
   },
 

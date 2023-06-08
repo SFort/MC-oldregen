@@ -1,10 +1,10 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "sf.ssf.sfort.mixin",
+  "package": "tf.ssf.sfort.oldregen.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "Regen"
+    "RegenMixin"
   ],
   "client": [
   ],
